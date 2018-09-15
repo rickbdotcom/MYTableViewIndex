@@ -118,8 +118,10 @@ open class TableViewIndex : UIControl {
         isExclusiveTouch = true
         isMultipleTouchEnabled = false
         isAccessibilityElement = true
-        accessibilityTraits = UIAccessibilityTraitAdjustable
+		accessibilityTraits = UIAccessibilityTraits.adjustable
         accessibilityLabel = NSLocalizedString("Table index", comment: "Accessibility title for the section index control")
+        
+        updateAccessibilityValue()
     }
     
     // MARK: - Updates
@@ -164,6 +166,8 @@ open class TableViewIndex : UIControl {
         
         currentIndex = index
         
+        updateAccessibilityValue()
+        
         if let delegate = self.delegate
             , delegate.responds(to: #selector(TableViewIndexDelegate.tableViewIndex(_:didSelect:at:))) {
             
@@ -172,8 +176,12 @@ open class TableViewIndex : UIControl {
                 notifyFeedbackGenerator()
             }
         }
+    }
+    
+    private func updateAccessibilityValue() {
+        guard currentIndex >= 0 && currentIndex < items.count else { return }
         
-        let currentItem = items[index]
+        let currentItem = items[currentIndex]
         
         let titleText: String
         if let labelText = currentItem.accessibilityLabel {
@@ -185,7 +193,7 @@ open class TableViewIndex : UIControl {
         }
         
         let selectedText = NSLocalizedString("Selected", comment: "Accessibility title for the selected state")
-        UIAccessibilityPostNotification(UIAccessibilityAnnouncementNotification, "\(titleText), \(selectedText)")
+        accessibilityValue = "\(titleText), \(selectedText)"
     }
         
     // MARK: - Layout
@@ -220,7 +228,7 @@ open class TableViewIndex : UIControl {
         let layout = ItemLayout(items: items, style: style)
         let width = layout.size.width + style.indexInset.left + style.indexInset.right
         let minWidth: CGFloat = 44.0
-        return CGSize(width: max(width, minWidth), height: UIViewNoIntrinsicMetric)
+		return CGSize(width: max(width, minWidth), height: UIView.noIntrinsicMetric)
     }
     
     open override func sizeThatFits(_ size: CGSize) -> CGSize {
